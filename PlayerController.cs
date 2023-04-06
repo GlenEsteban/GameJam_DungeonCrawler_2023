@@ -1,59 +1,85 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Interactions;
+using UnityEngine.InputSystem.Interactions; //need this namespace to get access to Interactions script
 
-public class PlayerController : MonoBehaviour
-{
-    public Vector2Int spawnCoordinates;
+
+public class PlayerController : MonoBehaviour {
+    [SerializeField] bool isLerping;
+    [SerializeField] bool isSlerping;
+    [SerializeField] float movementSpeed = .5f;
+    [SerializeField] float rotationSpeed = .3f;
+
+    [SerializeField] Vector2Int spawnCoordinates;
     Grid grid;
     PlayerInputActions playerInputActions;
-    public GameObject currentTile;
-    public GameObject nextTile;
-    public Vector2Int GetSpawnCoord(){
+    GameObject currentTile;
+    GameObject nextTile;
+    bool isMoving;
+    private Vector2 moveDirection;
+
+    public Vector2Int GetSpawnCoord() {
         return spawnCoordinates;
     }
-    public GameObject GetCurrentTile(){
+    public GameObject GetCurrentTile() {
         return currentTile;
     }
-    void Awake(){
+    void OnEnable() {
+        playerInputActions.Enable();
+    }
+
+    void OnDisable() {
+        playerInputActions.Disable();    
+    }
+    void Awake() {
         grid = FindObjectOfType<Grid>();
         playerInputActions = new PlayerInputActions();
 
-        // Enable input actions and subscribe to the Move action
-        playerInputActions.Player.Enable();
+        // Enable input actions and subscribe to the input actions
         playerInputActions.Player.Move.performed += Move;
+        playerInputActions.Player.Move.canceled += CancelMove;
+
         playerInputActions.Player.LookRight.performed += LookRight;
         playerInputActions.Player.LookLeft.performed += LookLeft;
-
-        StartCoroutine(SpawnPlayer()); //guards against missing reference while tiles are generated
+        
+        // Spawn player after grid generation
+        StartCoroutine(SpawnPlayer());
     }
 
-    void Update(){
-
+    private void Update() {
+        CheckForMovement();
     }
-    public void Move(InputAction.CallbackContext context){
-        Vector2 moveDirection = context.ReadValue<Vector2>();
-        Vector3 currentDirection = this.transform.forward;
 
-        FindNextTile(moveDirection, currentDirection);
-        if (nextTile != null) {
-            MoveToTile(nextTile.transform.parent.gameObject);
+    public void Move(InputAction.CallbackContext context) {
+        isMoving = true;
+        moveDirection = context.ReadValue<Vector2>();
+    }
+    void CancelMove(InputAction.CallbackContext context) {
+        isMoving = false;
+    }
+    public void LookRight(InputAction.CallbackContext context) {
+        if (isSlerping) {return;}
+        Quaternion rotation = transform.rotation * Quaternion.Euler(0, 90, 0);
+        StartCoroutine(SlerpRotation(rotation, rotationSpeed));
+    }
+
+    public void LookLeft(InputAction.CallbackContext context) {
+        if (isSlerping) {return;}
+        Quaternion rotation = transform.rotation * Quaternion.Euler(0, -90, 0);
+        StartCoroutine(SlerpRotation(rotation, rotationSpeed));
+    }
+
+    void CheckForMovement(){
+        if (isMoving && !isLerping){ 
+            Vector3 currentDirection = this.transform.forward;
+            FindNextTile(moveDirection, currentDirection);
+            if (nextTile != null) {
+                MoveToTile(nextTile.transform.parent.gameObject);
+            }
         }
     }
-    public void LookRight(InputAction.CallbackContext context)
-    {
-        transform.LookAt(transform.position + transform.right);
-    }
 
-    public void LookLeft(InputAction.CallbackContext context)
-    {
-        transform.LookAt(transform.position - transform.right);
-    }
-
-    void FindNextTile(Vector2 moveDirection, Vector3 currentDirection){
+    void FindNextTile(Vector2 moveDirection, Vector3 currentDirection) {
         if (currentTile.GetComponentInChildren<Tile>() == null) {return;} // guards against null
 
         if (moveDirection.y == 1) {
@@ -98,8 +124,7 @@ public class PlayerController : MonoBehaviour
                 nextTile = currentTile.GetComponentInChildren<Tile>().GetNorthTile();
             }
         }
-        else if (moveDirection.x == 1)
-        {
+        else if (moveDirection.x == 1) {
             if (currentDirection == Vector3.forward) {
                 nextTile = currentTile.GetComponentInChildren<Tile>().GetEastTile();
             }
@@ -115,16 +140,45 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void MoveToTile (GameObject tile){
+    void MoveToTile (GameObject tile) {
+        if (isLerping) {return;}
         if (tile.GetComponentInChildren<Tile>().GetIsWall()) {return;}
-        this.transform.position = tile.transform.position;
+        StartCoroutine(LerpPosition(tile.transform.position, movementSpeed));
         currentTile = tile;
     }
 
-    IEnumerator SpawnPlayer(){
+    IEnumerator SpawnPlayer() {
         yield return new WaitForEndOfFrame();
         GameObject spawnTile = grid.GetTile(spawnCoordinates.x, spawnCoordinates.y).transform.parent.gameObject;
         this.transform.position = spawnTile.transform.position;
         currentTile = spawnTile;
+    }
+
+    IEnumerator LerpPosition(Vector3 targetPosition, float duration) {
+        isLerping = true;
+        float time = 0;
+        Vector3 startPosition = transform.position;
+        while (time < duration)
+        {
+            transform.position = Vector3.Lerp(startPosition, targetPosition, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = targetPosition;
+        isLerping = false;
+    }
+
+    IEnumerator SlerpRotation(Quaternion targetRotation, float duration) {
+        isSlerping = true;
+        float time = 0;
+        Quaternion startPosition = transform.localRotation;
+        while (time < duration)
+        {
+            transform.rotation = Quaternion.Slerp(startPosition, targetRotation, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+        transform.rotation = targetRotation;
+        isSlerping = false;
     }
 }

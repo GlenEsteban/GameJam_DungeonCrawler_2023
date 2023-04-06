@@ -64,6 +64,8 @@ public class Grid : MonoBehaviour {
 
     IEnumerator ApplyTileTypes(){
         yield return new WaitForEndOfFrame();
+
+        // set wall tile color and state
         foreach (Vector2Int wallCoord in walls){
             GameObject wall = GetTile(wallCoord.x, wallCoord.y);
             if (wall != null){
@@ -71,6 +73,12 @@ public class Grid : MonoBehaviour {
                 wall.transform.parent.GetChild(1).GetComponent<CoordinateMapper>().SetLabelColor(Color.blue);
             }
         }
+
+        // set color of spawn tile
+        PlayerController player = FindObjectOfType<PlayerController>();
+        Vector2Int spawnTileCoord = player.GetSpawnCoord();
+        GameObject spawnTile = GetTile(spawnTileCoord.x, spawnTileCoord.y);
+        spawnTile.transform.parent.GetChild(1).GetComponent<CoordinateMapper>().SetLabelColor(Color.green);
     }
 
     void CheckGridChange() {

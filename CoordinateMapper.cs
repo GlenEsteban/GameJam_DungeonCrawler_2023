@@ -8,7 +8,7 @@ public class CoordinateMapper : MonoBehaviour
 {
     [SerializeField] float coordinateMapOffset = 10f;
     TextMeshPro label;
-    public Color labelColor;
+    Color labelColor;
     Vector2Int coordinates = new Vector2Int();
 
     public void SetLabelColor(Color color) {
@@ -16,6 +16,7 @@ public class CoordinateMapper : MonoBehaviour
     }
     void Awake() {
         label = GetComponent<TextMeshPro>();
+        labelColor = Color.white;
         DisplayCoordinates();
     }
 
@@ -30,12 +31,11 @@ public class CoordinateMapper : MonoBehaviour
         UpdateObjectName();
     }
 
-    void DisplayCoordinates() 
-    {   
+    void DisplayCoordinates() {   
         // Find coordinates and set label text
         coordinates.x = Mathf.RoundToInt(transform.parent.position.x / UnityEditor.EditorSnapSettings.move.x);
         coordinates.y = Mathf.RoundToInt(transform.parent.position.z / UnityEditor.EditorSnapSettings.move.z);
-        label.text = coordinates.x + "," + coordinates.y;
+        label.text = coordinates.y + "," + coordinates.x;
 
         // Position coordinate map in 2d view
         this.transform.position = new Vector3 (coordinates.x * UnityEditor.EditorSnapSettings.move.x, coordinates.y * UnityEditor.EditorSnapSettings.move.y + coordinateMapOffset, 0);
@@ -45,8 +45,7 @@ public class CoordinateMapper : MonoBehaviour
         label.alpha = 1;
     }
 
-    void UpdateObjectName()
-    {
+    void UpdateObjectName() {
         transform.parent.name = coordinates.ToString();
     }
 }
