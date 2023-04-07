@@ -151,10 +151,18 @@ public class PlayerController : MonoBehaviour {
         if (tile.GetComponentInChildren<Tile>().IsEnemy()) {
             //enter battle state
             isBattling = true;
+            
+            // Encounter enemy
             Enemy enemy = tile.GetComponentInChildren<Enemy>();
             enemy.EncounterEnemy();
+
+            // Slerp rotation to enemy
             Quaternion rotation = Quaternion.LookRotation(transform.position + (tile.transform.parent.transform.position - transform.position));
             StartCoroutine(SlerpRotation(rotation, rotationSpeed));
+
+            // Play battle BGM
+            BGMPlayer bGMPlayer = FindObjectOfType<BGMPlayer>();
+            bGMPlayer.PlayBattleBGM();
             return;
         }
 
