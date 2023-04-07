@@ -4,3 +4,6 @@ PlayerController.cs.meta
 Tile.cs.meta
 Enemy.cs.meta
 BGMPlayer.cs.meta
+BattleUI.cs.meta
+Dot.cs.meta
+HealthUI.cs.meta
