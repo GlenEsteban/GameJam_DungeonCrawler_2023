@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour {
     GameObject currentTile;
     GameObject nextTile;
     bool isMoving;
+    bool isBattling;
     private Vector2 moveDirection;
 
     public Vector2Int GetSpawnCoord() {
@@ -23,6 +24,9 @@ public class PlayerController : MonoBehaviour {
     }
     public GameObject GetCurrentTile() {
         return currentTile;
+    }
+    public bool IsBattling() {
+        return isBattling;
     }
     void OnEnable() {
         playerInputActions.Enable();
@@ -47,6 +51,7 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void Update() {
+        if (isBattling) {return;}
         CheckForMovement();
     }
 
@@ -58,13 +63,13 @@ public class PlayerController : MonoBehaviour {
         isMoving = false;
     }
     public void LookRight(InputAction.CallbackContext context) {
-        if (isSlerping) {return;}
+        if (isSlerping || isBattling) {return;}
         Quaternion rotation = transform.rotation * Quaternion.Euler(0, 90, 0);
         StartCoroutine(SlerpRotation(rotation, rotationSpeed));
     }
 
     public void LookLeft(InputAction.CallbackContext context) {
-        if (isSlerping) {return;}
+        if (isSlerping || isBattling) {return;}
         Quaternion rotation = transform.rotation * Quaternion.Euler(0, -90, 0);
         StartCoroutine(SlerpRotation(rotation, rotationSpeed));
     }
@@ -74,7 +79,7 @@ public class PlayerController : MonoBehaviour {
             Vector3 currentDirection = this.transform.forward;
             FindNextTile(moveDirection, currentDirection);
             if (nextTile != null) {
-                MoveToTile(nextTile.transform.parent.gameObject);
+                CheckTile(nextTile.transform.parent.gameObject);
             }
         }
     }
@@ -140,9 +145,19 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    void MoveToTile (GameObject tile) {
+    void CheckTile (GameObject tile) {
         if (isLerping) {return;}
-        if (tile.GetComponentInChildren<Tile>().GetIsWall()) {return;}
+        if (tile.GetComponentInChildren<Tile>().IsWall()) {return;}
+        if (tile.GetComponentInChildren<Tile>().IsEnemy()) {
+            //enter battle state
+            isBattling = true;
+            Enemy enemy = tile.GetComponentInChildren<Enemy>();
+            enemy.EncounterEnemy();
+            Quaternion rotation = Quaternion.LookRotation(transform.position + (tile.transform.parent.transform.position - transform.position));
+            StartCoroutine(SlerpRotation(rotation, rotationSpeed));
+            return;
+        }
+
         StartCoroutine(LerpPosition(tile.transform.position, movementSpeed));
         currentTile = tile;
     }

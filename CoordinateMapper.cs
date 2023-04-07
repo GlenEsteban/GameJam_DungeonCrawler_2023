@@ -46,6 +46,6 @@ public class CoordinateMapper : MonoBehaviour
     }
 
     void UpdateObjectName() {
-        transform.parent.name = coordinates.ToString();
+        transform.parent.name = coordinates.y + "," + coordinates.x;
     }
 }

@@ -7,14 +7,19 @@ public class Grid : MonoBehaviour {
     [SerializeField] bool refresh;
     [SerializeField] GameObject floorTilePrefab;
     [SerializeField] GameObject wallTilePrefab;
+    [SerializeField] GameObject enemyTilePrefab;
 
     [SerializeField] Vector2Int gridDimensions;
     [SerializeField] List<Vector2Int> walls;
+    [SerializeField] List<Vector2Int> enemies;
     public GameObject GetFloorTilePrefab() {
         return floorTilePrefab;
     }
     public GameObject GetWallTilePrefab() {
         return wallTilePrefab;
+    }
+    public GameObject GetEnemyTilePrefab() {
+        return enemyTilePrefab;
     }
     public GameObject GetTile(int x, int y) {
         if (x >= gridDimensions.x || x < 0 || y >= gridDimensions.y || y < 0) { return null;} // guards against non-existing tiles
@@ -29,13 +34,11 @@ public class Grid : MonoBehaviour {
         }
         walls.Add(coordinates);
     }
-    public bool CheckIfWall(Vector2Int coordinates){
-        foreach (Vector2Int wall in walls) {
-            if (coordinates == wall) {
-                return true;
-            }
+    public void AddToEnemies(Vector2Int coordinates){
+        foreach (Vector2Int enemy in enemies){
+            if (coordinates == enemy) {return;}
         }
-        return false;
+        enemies.Add(coordinates);
     }
     void Awake() {
         if (gridDimensions.x == 0 && gridDimensions.y == 0) { return; }
@@ -71,6 +74,15 @@ public class Grid : MonoBehaviour {
             if (wall != null){
                 wall.GetComponent<Tile>().SetIsWall(true);
                 wall.transform.parent.GetChild(1).GetComponent<CoordinateMapper>().SetLabelColor(Color.blue);
+            }
+        }
+
+        //set enemy tile color and state
+        foreach (Vector2Int enemyCoord in enemies){
+            GameObject enemy = GetTile(enemyCoord.x, enemyCoord.y);
+            if (enemy != null){
+                enemy.GetComponent<Tile>().SetIsEnemy(true);
+                enemy.transform.parent.GetChild(1).GetComponent<CoordinateMapper>().SetLabelColor(Color.red);
             }
         }
 

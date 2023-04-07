@@ -6,15 +6,16 @@ using UnityEngine;
 public class Tile : MonoBehaviour
 {
     [SerializeField] bool isWall;
+    [SerializeField] bool isEnemy;
     [SerializeField] Vector2Int coordinates;
-    public GameObject northTile;
-    public GameObject southTile;
-    public GameObject westTile;
-    public GameObject eastTile;
+    GameObject northTile;
+    GameObject southTile;
+    GameObject westTile;
+    GameObject eastTile;
     Transform mesh;
     Grid grid;
     bool isUpdated;
-    
+
     public GameObject GetNorthTile() {
         return northTile;
     }
@@ -30,8 +31,14 @@ public class Tile : MonoBehaviour
     public void SetIsWall(bool state) {
         isWall = state;
     }
-    public bool GetIsWall() {
+    public void SetIsEnemy(bool state) {
+        isEnemy = state;
+    }
+    public bool IsWall() {
         return isWall;
+    }
+    public bool IsEnemy(){
+        return isEnemy;
     }
     public void SetCoordinates(int x, int y) {
         coordinates.x = x;
@@ -63,7 +70,7 @@ public class Tile : MonoBehaviour
     IEnumerator UpdateTileType(){
         yield return new WaitForEndOfFrame();
         if(!isUpdated) {            
-            if (isWall){
+            if (isWall) {
                 grid.AddToWalls(coordinates);
                 GameObject wallTileMesh = grid.GetWallTilePrefab();
                 Quaternion rotation = Quaternion.Euler(transform.rotation.x, Random.Range(0,3) * 90, transform.rotation.y);
@@ -72,7 +79,20 @@ public class Tile : MonoBehaviour
                 // Update coordinate color on coordinate map
                 transform.parent.GetComponentInChildren<CoordinateMapper>().SetLabelColor(Color.blue);
 
-                // Close update
+                // Finish updating tile
+                isUpdated = true;
+            }
+            else if (isEnemy) {
+                grid.AddToEnemies(coordinates);
+                grid = FindObjectOfType<Grid>();
+                GameObject enemy = grid.GetEnemyTilePrefab();
+                GameObject player = FindObjectOfType<PlayerController>().gameObject;
+                Instantiate(enemy, this.transform.parent.position, Quaternion.identity, transform);
+                
+                // Update coordinate color on coordinate map
+                transform.parent.GetComponentInChildren<CoordinateMapper>().SetLabelColor(Color.red);
+
+                // Finish updating tile
                 isUpdated = true;
             }
         }
