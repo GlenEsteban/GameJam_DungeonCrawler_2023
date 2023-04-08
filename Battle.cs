@@ -9,17 +9,15 @@ public class Battle : MonoBehaviour
     [SerializeField] float iconScaleMultiplier = 2f;
     [SerializeField] AudioClip defendSFX;
     [SerializeField] AudioClip attackSFX;
+    [SerializeField] AudioClip recoilSFX;
     SFXPlayer sfxPlayer;
     RectTransform rectTransform;
     Vector3 startingScale;
- 
+    public bool isBattling;
     public bool isDefending;
     public bool isAttacking;
-    public void SetIsDefending(bool state) {
-        isDefending = state;
-    }
-    public void SetIsAttacking(bool state) {
-        isAttacking = state;
+    public void SetIsBattling(bool state) {
+        isBattling = state;
     }
 
     void Start(){
@@ -30,20 +28,26 @@ public class Battle : MonoBehaviour
 
     public void Defend() {
         if (isShield) {
-            sfxPlayer.PlayClip(defendSFX);
             StartCoroutine(ScaleIcon());
-            if (dotList.Count == 0) { return; }
-            dotList[0].DestroyDot();
-            Debug.Log("Defend!");
+            if (dotList.Count == 0) {
+                sfxPlayer.PlayClip(recoilSFX);
+            }
+            else {
+                sfxPlayer.PlayClip(defendSFX);
+                dotList[0].DestroyDot();
+            }
         }
     }
     public void Attack() {
         if (isSword) {
-            sfxPlayer.PlayClip(defendSFX);
             StartCoroutine(ScaleIcon());
-            if (dotList.Count == 0) { return; }
-            dotList[0].DestroyDot();
-            Debug.Log("Attack!");
+            if (dotList.Count == 0) {
+                sfxPlayer.PlayClip(recoilSFX);
+            }
+            else {
+                sfxPlayer.PlayClip(attackSFX);
+                dotList[0].DestroyDot();
+            }
         }
     }
 

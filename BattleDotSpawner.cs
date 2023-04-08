@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BattleUI : MonoBehaviour
+public class BattleDotSpawner : MonoBehaviour
 {
+    [SerializeField] float minShieldDotSpacing = 1f;
+    [SerializeField] float maxShieldDotSpacing = 2f;
+    [SerializeField] float minSwordDotSpacing = 1f;
+    [SerializeField] float maxSwordDotSpacing = 2f;
     [SerializeField] [Range(0,4)] float dotSpeedMultiplier = 1f;
     [SerializeField] float delayDotSpawn;
-    [SerializeField] Image shieldIcon;
-    [SerializeField] Image swordIcon; 
     [SerializeField] GameObject dot;
     [SerializeField] GameObject shieldDotSpawn;
     [SerializeField] GameObject swordDotSpawn;
-
+    [SerializeField] bool isBattling;
     float time;
     float timeSinceShieldDot;
     float timeSinceSwordDot;
@@ -23,12 +25,13 @@ public class BattleUI : MonoBehaviour
         return dotSpeedMultiplier;
     }
 
-    void Awake() {
+    void OnEnable() {
         time = 0;
         timeSinceShieldDot = 0;
         timeBetweenShieldDot = 0;
         timeSinceSwordDot = 0;
         timeBetweenSwordDot = 0;
+
     }
     void Update()
     {
@@ -43,7 +46,7 @@ public class BattleUI : MonoBehaviour
         timeSinceShieldDot += Time.deltaTime;
         if (timeSinceShieldDot > timeBetweenShieldDot) {
             timeSinceShieldDot = 0;
-            timeBetweenShieldDot = Random.Range(.3f, 2f);
+            timeBetweenShieldDot = Random.Range(minShieldDotSpacing, maxShieldDotSpacing);
             Instantiate(dot, shieldDotSpawn.transform.position, Quaternion.identity, shieldDotSpawn.transform);
         }
     }
@@ -52,7 +55,7 @@ public class BattleUI : MonoBehaviour
         timeSinceSwordDot += Time.deltaTime;
         if (timeSinceSwordDot > timeBetweenSwordDot) {
             timeSinceSwordDot = 0;
-            timeBetweenSwordDot = Random.Range(.3f, 2f);
+            timeBetweenSwordDot = Random.Range(minSwordDotSpacing, maxSwordDotSpacing);
             Instantiate(dot, swordDotSpawn.transform.position, Quaternion.identity, swordDotSpawn.transform);
         }
     }

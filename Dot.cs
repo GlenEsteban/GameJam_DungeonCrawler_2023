@@ -6,13 +6,17 @@ public class Dot : MonoBehaviour
 {
     [SerializeField] float yPosOffset = -100f;
     RectTransform rectTransform;
-    BattleUI battleUI;
+    BattleDotSpawner dotSpawner;
     Rigidbody2D rb;
     float dotMoveSpeed;
 
+    private void OnDisable() {
+        Destroy(gameObject);
+    }
+
     void Start() {
-        battleUI = FindObjectOfType<BattleUI>();
-        dotMoveSpeed = 1 / battleUI.GetDotMoveSpeed();
+        dotSpawner = FindObjectOfType<BattleDotSpawner>();
+        dotMoveSpeed = 1 / dotSpawner.GetDotMoveSpeed();
         rectTransform = GetComponent<RectTransform>();
         rb = GetComponent<Rigidbody2D>();
         Vector3 targetPosition = new Vector3(transform.position.x, transform.position.y + yPosOffset, transform.position.z);

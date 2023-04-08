@@ -7,3 +7,6 @@ BGMPlayer.cs.meta
 BattleUI.cs.meta
 Dot.cs.meta
 HealthUI.cs.meta
+Battle.cs.meta
+BattleDotSpawner.cs.meta
+SFXPlayer.cs.meta

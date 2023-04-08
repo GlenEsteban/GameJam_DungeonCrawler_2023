@@ -46,10 +46,8 @@ public class PlayerController : MonoBehaviour {
         playerInputActions.Player.Move.canceled += CancelMove;
 
         playerInputActions.Player.Defend.performed += Defend;
-        playerInputActions.Player.Defend.canceled += CancelDefend;
 
         playerInputActions.Player.Attack.performed += Attack;
-        playerInputActions.Player.Attack.canceled += CancelAttack;
 
         playerInputActions.Player.LookRight.performed += LookRight;
 
@@ -73,16 +71,12 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Defend(InputAction.CallbackContext context) {
+        if (Shield == null) { return; }
         Shield.Defend();
     }
-    void CancelDefend(InputAction.CallbackContext context) {
-        Shield.SetIsDefending(false);
-    }
     void Attack(InputAction.CallbackContext context) {
+        if (Shield == null) { return; }
         Sword.Attack();
-    }
-    void CancelAttack(InputAction.CallbackContext context) {
-        Sword.SetIsAttacking(false);
     }
     public void LookRight(InputAction.CallbackContext context) {
         if (isSlerping || isBattling) {return;}
