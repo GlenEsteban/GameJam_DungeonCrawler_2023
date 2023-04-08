@@ -9,7 +9,8 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] bool isSlerping;
     [SerializeField] float movementSpeed = .5f;
     [SerializeField] float rotationSpeed = .3f;
-
+    [SerializeField] Battle Shield;
+    [SerializeField] Battle Sword;
     [SerializeField] Vector2Int spawnCoordinates;
     Grid grid;
     PlayerInputActions playerInputActions;
@@ -17,6 +18,7 @@ public class PlayerController : MonoBehaviour {
     GameObject nextTile;
     bool isMoving;
     bool isBattling;
+
     private Vector2 moveDirection;
 
     public Vector2Int GetSpawnCoord() {
@@ -36,14 +38,21 @@ public class PlayerController : MonoBehaviour {
         playerInputActions.Disable();    
     }
     void Awake() {
-        grid = FindObjectOfType<Grid>();
+        grid = FindObjectOfType<Grid>(); 
         playerInputActions = new PlayerInputActions();
 
         // Enable input actions and subscribe to the input actions
         playerInputActions.Player.Move.performed += Move;
         playerInputActions.Player.Move.canceled += CancelMove;
 
+        playerInputActions.Player.Defend.performed += Defend;
+        playerInputActions.Player.Defend.canceled += CancelDefend;
+
+        playerInputActions.Player.Attack.performed += Attack;
+        playerInputActions.Player.Attack.canceled += CancelAttack;
+
         playerInputActions.Player.LookRight.performed += LookRight;
+
         playerInputActions.Player.LookLeft.performed += LookLeft;
         
         // Spawn player after grid generation
@@ -61,6 +70,19 @@ public class PlayerController : MonoBehaviour {
     }
     void CancelMove(InputAction.CallbackContext context) {
         isMoving = false;
+    }
+
+    void Defend(InputAction.CallbackContext context) {
+        Shield.Defend();
+    }
+    void CancelDefend(InputAction.CallbackContext context) {
+        Shield.SetIsDefending(false);
+    }
+    void Attack(InputAction.CallbackContext context) {
+        Sword.Attack();
+    }
+    void CancelAttack(InputAction.CallbackContext context) {
+        Sword.SetIsAttacking(false);
     }
     public void LookRight(InputAction.CallbackContext context) {
         if (isSlerping || isBattling) {return;}
