@@ -10,6 +10,8 @@ public class Battle : MonoBehaviour
     [SerializeField] AudioClip defendSFX;
     [SerializeField] AudioClip attackSFX;
     [SerializeField] AudioClip recoilSFX;
+    [SerializeField] Animator animator;
+    BattleDotSpawner battleDotSpawner;
     SFXPlayer sfxPlayer;
     RectTransform rectTransform;
     Vector3 startingScale;
@@ -20,10 +22,22 @@ public class Battle : MonoBehaviour
         isBattling = state;
     }
 
-    void Start(){
+    void Start() {
         rectTransform = GetComponent<RectTransform>();
         startingScale = transform.localScale;
         sfxPlayer = FindObjectOfType<SFXPlayer>();
+        battleDotSpawner = FindObjectOfType<BattleDotSpawner>();
+    }
+
+    public void StartBattle() {
+        if (animator == null) { return; }
+        animator.SetBool("isBattling", true);
+        battleDotSpawner.SetIsBattling(true);
+    }
+
+    public void EndBattle() {
+        animator.SetBool("isBattling", false);
+        battleDotSpawner.SetIsBattling(false);
     }
 
     public void Defend() {

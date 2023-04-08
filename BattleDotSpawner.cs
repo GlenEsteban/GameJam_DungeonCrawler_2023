@@ -24,6 +24,9 @@ public class BattleDotSpawner : MonoBehaviour
     public float GetDotMoveSpeed(){
         return dotSpeedMultiplier;
     }
+    public void SetIsBattling(bool state){
+        isBattling = state;
+    }
 
     void OnEnable() {
         time = 0;

@@ -28,7 +28,6 @@ public class Enemy : MonoBehaviour
     }
 
     void Update() {
-
         LookAtPlayer();
     }
 
@@ -58,8 +57,6 @@ public class Enemy : MonoBehaviour
             this.transform.GetChild(0).gameObject.SetActive(true);
             StartCoroutine(LerpPosition(startingPosition, encounterDuration));
         }
-
-        Debug.Log("BATTLE!!");
     }
     IEnumerator LerpPosition(Vector3 targetPosition, float duration) {
         isLerping = true;

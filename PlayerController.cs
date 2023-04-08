@@ -9,8 +9,8 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] bool isSlerping;
     [SerializeField] float movementSpeed = .5f;
     [SerializeField] float rotationSpeed = .3f;
-    [SerializeField] Battle Shield;
-    [SerializeField] Battle Sword;
+    [SerializeField] Battle shield;
+    [SerializeField] Battle sword;
     [SerializeField] Vector2Int spawnCoordinates;
     Grid grid;
     PlayerInputActions playerInputActions;
@@ -71,12 +71,12 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Defend(InputAction.CallbackContext context) {
-        if (Shield == null) { return; }
-        Shield.Defend();
+        if (shield == null || !isBattling) { return; }
+        shield.Defend();
     }
     void Attack(InputAction.CallbackContext context) {
-        if (Shield == null) { return; }
-        Sword.Attack();
+        if (sword == null || !isBattling) { return; }
+        sword.Attack();
     }
     public void LookRight(InputAction.CallbackContext context) {
         if (isSlerping || isBattling) {return;}
@@ -170,6 +170,8 @@ public class PlayerController : MonoBehaviour {
             
             // Encounter enemy
             Enemy enemy = tile.GetComponentInChildren<Enemy>();
+            if (shield == null) { return; }
+            shield.StartBattle();
             enemy.EncounterEnemy();
 
             // Slerp rotation to enemy
