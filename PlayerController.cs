@@ -79,18 +79,18 @@ public class PlayerController : MonoBehaviour {
         sword.Attack();
     }
     public void LookRight(InputAction.CallbackContext context) {
-        if (isSlerping || isBattling) {return;}
+        if (isSlerping || isBattling) { return; }
         Quaternion rotation = transform.rotation * Quaternion.Euler(0, 90, 0);
         StartCoroutine(SlerpRotation(rotation, rotationSpeed));
     }
 
     public void LookLeft(InputAction.CallbackContext context) {
-        if (isSlerping || isBattling) {return;}
+        if (isSlerping || isBattling) { return; }
         Quaternion rotation = transform.rotation * Quaternion.Euler(0, -90, 0);
         StartCoroutine(SlerpRotation(rotation, rotationSpeed));
     }
 
-    void CheckForMovement(){
+    void CheckForMovement() {
         if (isMoving && !isLerping){ 
             Vector3 currentDirection = this.transform.forward;
             FindNextTile(moveDirection, currentDirection);
@@ -199,8 +199,7 @@ public class PlayerController : MonoBehaviour {
         isLerping = true;
         float time = 0;
         Vector3 startPosition = transform.position;
-        while (time < duration)
-        {
+        while (time < duration) {
             transform.position = Vector3.Lerp(startPosition, targetPosition, time / duration);
             time += Time.deltaTime;
             yield return null;
@@ -213,8 +212,7 @@ public class PlayerController : MonoBehaviour {
         isSlerping = true;
         float time = 0;
         Quaternion startPosition = transform.localRotation;
-        while (time < duration)
-        {
+        while (time < duration) {
             transform.rotation = Quaternion.Slerp(startPosition, targetRotation, time / duration);
             time += Time.deltaTime;
             yield return null;

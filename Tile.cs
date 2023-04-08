@@ -37,7 +37,7 @@ public class Tile : MonoBehaviour
     public bool IsWall() {
         return isWall;
     }
-    public bool IsEnemy(){
+    public bool IsEnemy() {
         return isEnemy;
     }
     public void SetCoordinates(int x, int y) {
@@ -55,7 +55,7 @@ public class Tile : MonoBehaviour
         RandomizeTile(this.gameObject);
     }
 
-    void Update(){
+    void Update() {
         StartCoroutine(UpdateTileType());
     }
 
@@ -67,7 +67,7 @@ public class Tile : MonoBehaviour
         eastTile = grid.GetTile(coordinates.x + 1, coordinates.y);
     }
 
-    IEnumerator UpdateTileType(){
+    IEnumerator UpdateTileType() {
         yield return new WaitForEndOfFrame();
         if(!isUpdated) {            
             if (isWall) {

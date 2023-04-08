@@ -23,7 +23,7 @@ public class Dot : MonoBehaviour
         StartCoroutine(LerpPosition(targetPosition, 5f * dotMoveSpeed));
     }
     
-    public void DestroyDot(){
+    public void DestroyDot() {
         //Play sfx
 
         rb.isKinematic = false;
@@ -34,8 +34,7 @@ public class Dot : MonoBehaviour
     IEnumerator LerpPosition(Vector3 targetPosition, float duration) {
         float time = 0;
         Vector3 startPosition = rectTransform.position;
-        while (time < duration)
-        {
+        while (time < duration) {
             rectTransform.position = Vector3.Lerp(startPosition, targetPosition, time / duration);
             time += Time.deltaTime;
             yield return null;

@@ -15,8 +15,6 @@ public class Enemy : MonoBehaviour
     GameObject player;
     Vector3 startingPosition;
     bool isHidden;
-    bool isLerping;
-    bool runOnce;
 
     void Awake() {
         startingPosition = this.transform.position;
@@ -31,16 +29,14 @@ public class Enemy : MonoBehaviour
         LookAtPlayer();
     }
 
-    private void LookAtPlayer()
-    {
+    private void LookAtPlayer() {
         float distanceToPlayer = (player.transform.position - this.transform.position).magnitude;
-        if (distanceToPlayer < radiusLookTrigger)
-        {
+        if (distanceToPlayer < radiusLookTrigger) {
             transform.LookAt(player.transform);
         }
     }
 
-    void CheckIfHidden(){
+    void CheckIfHidden() {
         float random = Random.Range(0,100);
         isHidden = random < 50;
         if (isHidden) {
@@ -51,7 +47,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    public void EncounterEnemy(){
+    public void EncounterEnemy() {
         if (isHidden) {
             this.transform.position = new Vector3(transform.position.x, transform.position.y + encounterOffset, transform.position.z);
             this.transform.GetChild(0).gameObject.SetActive(true);
@@ -59,7 +55,6 @@ public class Enemy : MonoBehaviour
         }
     }
     IEnumerator LerpPosition(Vector3 targetPosition, float duration) {
-        isLerping = true;
         float time = 0;
         Vector3 startPosition = transform.position;
         while (time < duration)
@@ -69,6 +64,5 @@ public class Enemy : MonoBehaviour
             yield return null;
         }
         transform.position = targetPosition;
-        isLerping = false;
     }
 }

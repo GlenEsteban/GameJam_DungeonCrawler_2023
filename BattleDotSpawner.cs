@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class BattleDotSpawner : MonoBehaviour
 {
@@ -21,10 +20,10 @@ public class BattleDotSpawner : MonoBehaviour
     float timeBetweenShieldDot;
     float timeBetweenSwordDot;
 
-    public float GetDotMoveSpeed(){
+    public float GetDotMoveSpeed() {
         return dotSpeedMultiplier;
     }
-    public void SetIsBattling(bool state){
+    public void SetIsBattling(bool state) {
         isBattling = state;
     }
 
