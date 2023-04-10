@@ -12,9 +12,10 @@ public class Battle : MonoBehaviour
     [SerializeField] AudioClip recoilSFX;
     [SerializeField] Animator animator;
     GameObject player;
+    GameObject enemy;
     Health playerHealth;
-    BattleStats playerBattleStats;
     Health enemyHealth;
+    BattleStats playerBattleStats;
     BattleStats enemyBattleStats;
     int recoilDamage;
     int damageDealt;
@@ -28,6 +29,7 @@ public class Battle : MonoBehaviour
     HealthUI healthUI;
     Vector3 startingScale;
     bool isBattling;
+    bool isLerping;
 
     void Start() {
 
@@ -47,8 +49,15 @@ public class Battle : MonoBehaviour
         damageDealt = playerBattleStats.GetDamageDealt();
 
         // Cache enemy battle info
-        
+        // enemy = player.GetComponent<PlayerController>().GetEnemy().gameObject;
+        // enemyHealth = enemy.GetComponent<Health>();
+        // enemyBattleStats = enemy.GetComponent<BattleStats>();
 
+        // blocksTillRecovery = playerBattleStats.GetBlocksTillRecovery();
+        // recoveryAmount = playerBattleStats.GetRecoveryAmount();
+        // recoilDamage = playerBattleStats.GetRecoilDamage();
+        // damageDealt = playerBattleStats.GetDamageDealt();
+    
     }
 
     public void StartBattle() {
@@ -135,8 +144,15 @@ public class Battle : MonoBehaviour
     }
 
     IEnumerator ScaleIcon() {
-        rectTransform.localScale = new Vector3 (rectTransform.localScale.x * iconScaleMultiplier, rectTransform.localScale.y * iconScaleMultiplier, 0);
-        yield return new WaitForSeconds(.1f);
-        rectTransform.localScale = startingScale;
+        if (!isLerping) {
+            isLerping = true;
+            rectTransform.localScale = new Vector3 (rectTransform.localScale.x * iconScaleMultiplier, rectTransform.localScale.y * iconScaleMultiplier, 0);
+            yield return new WaitForSeconds(.1f);
+            rectTransform.localScale = startingScale;
+            isLerping = false;
+        }
+        else {
+            yield return null;
+        }
     }
 }

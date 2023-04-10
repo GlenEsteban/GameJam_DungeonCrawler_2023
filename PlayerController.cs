@@ -12,12 +12,16 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] Battle shield;
     [SerializeField] Battle sword;
     [SerializeField] Vector2Int spawnCoordinates;
-    Grid grid;
+    Enemy enemy;
+    TileMap grid;
     PlayerInputActions playerInputActions;
     GameObject currentTile;
     GameObject nextTile;
     bool isMoving;
     bool isBattling;
+    public Enemy GetEnemy(){
+        return enemy;
+    }
 
     private Vector2 moveDirection;
 
@@ -38,7 +42,7 @@ public class PlayerController : MonoBehaviour {
         playerInputActions.Disable();    
     }
     void Awake() {
-        grid = FindObjectOfType<Grid>(); 
+        grid = FindObjectOfType<TileMap>(); 
         playerInputActions = new PlayerInputActions();
 
         // Enable input actions and subscribe to the input actions
@@ -54,7 +58,7 @@ public class PlayerController : MonoBehaviour {
         playerInputActions.Player.LookLeft.performed += LookLeft;
         
         // Spawn player after grid generation
-        StartCoroutine(SpawnPlayer());
+        //StartCoroutine(SpawnPlayer());
     }
 
     private void Update() {
@@ -142,7 +146,7 @@ public class PlayerController : MonoBehaviour {
                 nextTile = currentTile.GetComponentInChildren<Tile>().GetSouthTile();
             }
             else if (currentDirection == Vector3.right) {
-                nextTile = currentTile.GetComponentInChildren<Tile>().GetNorthTile();
+                nextTile = currentTile.GetComponentInChildren<Tile>().gameObject;
             }
         }
         else if (moveDirection.x == 1) {
@@ -163,16 +167,18 @@ public class PlayerController : MonoBehaviour {
 
     void CheckTile (GameObject tile) {
         if (isLerping) {return;}
-        if (tile.GetComponentInChildren<Tile>().IsWall()) {return;}
-        if (tile.GetComponentInChildren<Tile>().IsEnemy()) {
+        if (tile.GetComponentInChildren<Tile>().GetTileTerrain() == TileTerrain.Wall) {return;}
+        if (tile.GetComponentInChildren<Tile>().GetTileTerrain() == TileTerrain.Floor) {
             //enter battle state
             isBattling = true;
             
-            // Encounter enemy
-            Enemy enemy = tile.GetComponentInChildren<Enemy>();
+            // Cache enemy and encounter enemy
+            enemy = tile.GetComponentInChildren<Enemy>();
+            print(enemy.gameObject.name);
             if (shield == null) { return; }
             shield.StartBattle();
             enemy.EncounterEnemy();
+
 
             // Slerp rotation to enemy
             Quaternion rotation = Quaternion.LookRotation(transform.position + (tile.transform.parent.transform.position - transform.position));

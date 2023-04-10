@@ -4,41 +4,45 @@ using UnityEngine;
 using TMPro;
 
 [ExecuteAlways]
-public class CoordinateMapper : MonoBehaviour
-{
-    [SerializeField] float coordinateMapOffset = 10f;
+public class CoordinateMapper : MonoBehaviour {
+    // Cache references
+    Vector2Int coordinates = new Vector2Int();
+    Tile tile;
+    TileMap tileMapGenerator;
+    float coordinateMapOffset;
     TextMeshPro label;
     Color labelColor;
-    Vector2Int coordinates = new Vector2Int();
 
+    // Accesors and Mutators
     public void SetLabelColor(Color color) {
         labelColor = color;
     }
+
     void Awake() {
+        // Get coordinate map offset from tile generator
+        tile = GetComponent<Tile>();
+        tileMapGenerator = FindObjectOfType<TileMap>();
+        coordinateMapOffset = tileMapGenerator.GetCoordinateMapOffset();
+
+        // Reference the label and color
         label = GetComponent<TextMeshPro>();
         labelColor = Color.white;
-        DisplayCoordinates();
     }
 
     void Update() {
-        if(!Application.isPlaying) {
-            DisplayCoordinates();
-        } 
-        else {
-            this.GetComponent<TextMeshPro>().enabled = false;
-            this.GetComponent<CoordinateMapper>().enabled = false;
-        }
+        if (Application.isPlaying) { return; }
+        DisplayCoordinates();
         UpdateObjectName();
     }
 
     void DisplayCoordinates() {   
-        // Find coordinates and set label text
-        coordinates.x = Mathf.RoundToInt(transform.parent.position.x / UnityEditor.EditorSnapSettings.move.x);
-        coordinates.y = Mathf.RoundToInt(transform.parent.position.z / UnityEditor.EditorSnapSettings.move.z);
+        // Get coordinates and set label text
+        coordinates.x = tile.GetCoordinates().x;
+        coordinates.y = tile.GetCoordinates().y;
         label.text = coordinates.y + "," + coordinates.x;
 
         // Position coordinate map in 2d view
-        this.transform.position = new Vector3 (coordinates.x * UnityEditor.EditorSnapSettings.move.x, coordinates.y * UnityEditor.EditorSnapSettings.move.y + coordinateMapOffset, 0);
+        this.transform.position = new Vector3 (coordinates.x * UnityEditor.EditorSnapSettings.move.x + coordinateMapOffset, coordinates.y * UnityEditor.EditorSnapSettings.move.y, 0);
 
         // Set color of label
         label.color = labelColor;
@@ -46,6 +50,6 @@ public class CoordinateMapper : MonoBehaviour
     }
 
     void UpdateObjectName() {
-        transform.parent.name = coordinates.y + "," + coordinates.x;
+        transform.name = coordinates.y + "," + coordinates.x;
     }
 }

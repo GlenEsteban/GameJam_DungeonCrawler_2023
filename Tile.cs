@@ -1,21 +1,58 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteAlways]
-public class Tile : MonoBehaviour
-{
-    [SerializeField] bool isWall;
-    [SerializeField] bool isEnemy;
-    [SerializeField] Vector2Int coordinates;
-    GameObject northTile;
-    GameObject southTile;
-    GameObject westTile;
-    GameObject eastTile;
-    Transform mesh;
-    Grid grid;
-    bool isUpdated;
+public enum TileTerrain { None, Floor, Wall }
+public enum TileEncounter { None, Enemy }
 
+[ExecuteAlways]
+public class Tile : MonoBehaviour {
+    [Header("Actions")]
+    [SerializeField] bool saveTile;
+
+    [Header("Terrain")]
+    [SerializeField] TileTerrain tileTerrain;
+    [SerializeField] GameObject terrainObj;
+    [Tooltip("The max deviation from the original position")]
+    [SerializeField] float tileHeightDeviationApex = .1f;
+
+    [Header("Encounters")]
+    [SerializeField] TileEncounter tileEncounter;
+    [SerializeField] GameObject encounterObj;
+
+    [Header("Tile Coordinates and Links")]
+    [SerializeField] Vector2Int coordinates;
+    [SerializeField] public GameObject northTile;
+    [SerializeField] public GameObject southTile;
+    [SerializeField] public GameObject westTile;
+    [SerializeField] public GameObject eastTile;
+
+    // Cached References
+    TileMap tileMapGenerator;
+    CoordinateMapper coordinateMapper;
+
+    // Accessors and Mutators
+    public void SetSaveTile(bool state) {
+        saveTile = state;
+    }
+    public TileTerrain GetTileTerrain() {
+        return tileTerrain;
+    }
+    public void SetTileTerrain(TileTerrain tileType) {
+        this.tileTerrain = tileType;
+    }
+    public TileEncounter GetTileEncounter() {
+        return tileEncounter;
+    }
+    public void SetTileEncounter(TileEncounter tileEncounter) {
+        this.tileEncounter = tileEncounter;
+    }
+    public Vector2Int GetCoordinates() {
+        return coordinates;
+    }
+    public void SetCoordinates(int x, int y) {
+        coordinates.x = x;
+        coordinates.y = y;
+    }
     public GameObject GetNorthTile() {
         return northTile;
     }
@@ -28,84 +65,87 @@ public class Tile : MonoBehaviour
     public GameObject GetEastTile() {
         return eastTile;
     }
-    public void SetIsWall(bool state) {
-        isWall = state;
-    }
-    public void SetIsEnemy(bool state) {
-        isEnemy = state;
-    }
-    public bool IsWall() {
-        return isWall;
-    }
-    public bool IsEnemy() {
-        return isEnemy;
-    }
-    public void SetCoordinates(int x, int y) {
-        coordinates.x = x;
-        coordinates.y = y;
-    }
+    
     void Awake() {
-        mesh = this.transform.parent.GetChild(0);
-        grid = FindObjectOfType<Grid>();
-        isWall = false;
-        isUpdated = false;
+        // Cache references
+        tileMapGenerator = FindObjectOfType<TileMap>();
+        coordinateMapper = GetComponent<CoordinateMapper>();
+    }
 
+    void Start() {
         StartCoroutine(LinkDirectionTiles());
-        StartCoroutine(UpdateTileType());
-        RandomizeTile(this.gameObject);
+        StartCoroutine(UpdateTerrain());
+        StartCoroutine(UpdateEncounters());
     }
 
     void Update() {
-        StartCoroutine(UpdateTileType());
-    }
+        if (!Application.isPlaying && saveTile) {
+            // Clear existing terrain and encounter objects
+            DestroyChildren();
 
-    IEnumerator LinkDirectionTiles() {
-        yield return new WaitForEndOfFrame(); // Find linked tiles after tile generation
-        northTile = grid.GetTile(coordinates.x, coordinates.y + 1);
-        southTile = grid.GetTile(coordinates.x, coordinates.y - 1);
-        westTile = grid.GetTile(coordinates.x - 1, coordinates.y);
-        eastTile = grid.GetTile(coordinates.x + 1, coordinates.y);
-    }
-
-    IEnumerator UpdateTileType() {
-        yield return new WaitForEndOfFrame();
-        if(!isUpdated) {            
-            if (isWall) {
-                grid.AddToWalls(coordinates);
-                GameObject wallTileMesh = grid.GetWallTilePrefab();
-                Quaternion rotation = Quaternion.Euler(transform.rotation.x, Random.Range(0,3) * 90, transform.rotation.y);
-                Instantiate(wallTileMesh, this.transform.parent.position, rotation , mesh);
-
-                // Update coordinate color on coordinate map
-                transform.parent.GetComponentInChildren<CoordinateMapper>().SetLabelColor(Color.blue);
-
-                // Finish updating tile
-                isUpdated = true;
-            }
-            else if (isEnemy) {
-                grid.AddToEnemies(coordinates);
-                grid = FindObjectOfType<Grid>();
-                GameObject enemy = grid.GetEnemyTilePrefab();
-                GameObject player = FindObjectOfType<PlayerController>().gameObject;
-                Instantiate(enemy, this.transform.parent.position, Quaternion.identity, transform);
-                
-                // Update coordinate color on coordinate map
-                transform.parent.GetComponentInChildren<CoordinateMapper>().SetLabelColor(Color.red);
-
-                // Finish updating tile
-                isUpdated = true;
-            }
+            // Update and cache terrain and encounters after tile map generation
+            StartCoroutine(UpdateTerrain());
+            StartCoroutine(UpdateEncounters());
         }
     }
 
-    void RandomizeTile(GameObject tile) {
-        if (tile != null) {
-            //Randomize height
-            tile.transform.position = new Vector3(tile.transform.position.x, Random.Range(-.1f, .1f), tile.transform.position.z);
+    IEnumerator LinkDirectionTiles() {
+        // Find linked tiles after tile map generation
+        yield return new WaitForEndOfFrame(); 
+        northTile = tileMapGenerator.GetTile(coordinates.x, coordinates.y + 1);
+        southTile = tileMapGenerator.GetTile(coordinates.x, coordinates.y - 1);
+        westTile = tileMapGenerator.GetTile(coordinates.x - 1, coordinates.y);
+        eastTile = tileMapGenerator.GetTile(coordinates.x + 1, coordinates.y);
+    }
 
-            //Randomize rotation
-            float randomRotationY = Random.Range(0,3) * 90;
-            mesh.transform.rotation = Quaternion.Euler(transform.rotation.x, randomRotationY, transform.rotation.z);
+    IEnumerator UpdateTerrain() {
+        // Wait until after tile map generation
+        yield return new WaitForEndOfFrame(); 
+
+        // Set coordinate color based on terrain type
+        if (tileTerrain == TileTerrain.None) {
+            coordinateMapper.SetLabelColor(Color.grey);
+        }
+        else if (tileTerrain == TileTerrain.Floor) {
+            coordinateMapper.SetLabelColor(Color.white);
+        }   
+        else if (tileTerrain == TileTerrain.Wall) {
+            coordinateMapper.SetLabelColor(Color.blue);
+        }
+
+        GenerateTerrainObject();
+        
+        // Finish updating
+        saveTile = false; 
+    }
+
+    void GenerateTerrainObject() {
+        if (terrainObj == null) { return; }
+
+        // Generate terrain object based on coordinates and with random 
+        float tileHeightDeviation = Random.Range(-tileHeightDeviationApex, tileHeightDeviationApex);
+        Vector3 position = new Vector3(coordinates.x * UnityEditor.EditorSnapSettings.move.x, tileHeightDeviation, coordinates.y * UnityEditor.EditorSnapSettings.move.x);
+        Quaternion rotation = Quaternion.Euler(transform.rotation.x, Random.Range(0,3) * 90, transform.rotation.z);
+        Instantiate(terrainObj, position, rotation, this.transform);
+    }
+    
+    IEnumerator UpdateEncounters() {
+        // Wait unitl after tile map generation
+        yield return new WaitForEndOfFrame(); 
+
+        // Overide terrain color and set color based on encounter
+        if (tileEncounter == TileEncounter.Enemy) {
+            coordinateMapper.SetLabelColor(Color.red);
+        }
+
+        // Finish updating
+        saveTile = false;
+    }
+
+    void DestroyChildren(){
+        // Destroy existing terrain and encounter objects
+        while (transform.childCount > 0) { 
+            DestroyImmediate(transform.GetChild(0).gameObject);
         }
     }
 }

@@ -2,15 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteAlways]
-public class Enemy : MonoBehaviour
-{
-
+public class Enemy : MonoBehaviour {
     [SerializeField] float radiusLookTrigger = 5f;
     [SerializeField] float encounterOffset = 5f;
     [SerializeField] float encounterDuration = 1f;
     [SerializeField] GameObject enemyMesh;
-    Grid grid;
+    TileMap grid;
     GameObject enemy;
     GameObject player;
     Vector3 startingPosition;
